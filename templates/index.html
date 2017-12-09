@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head>
+  <title>BeardPhat Controller</title>
+</head>
+<body>
+  <h1>BeardPhat Controller</h1>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class=flashes>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  <a href="./sparkle/0">Colours</a>
+  <a href="./sparkle/255">White</a>
+  <a href="./stop/">Stop</a>
+</body></html>
