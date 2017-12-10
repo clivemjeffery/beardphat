@@ -13,16 +13,35 @@ parser = argparse.ArgumentParser()
 parser.add_argument("sequence", choices=['sparkle', 'flash'], help="Type of mote sequence to play.")
 parser.add_argument("-i", "--interval", default=0.1, type=float, help="Interval between sparkles in seconds (default=0.1).")
 parser.add_argument("-d", "--density", default=8, type=int, help="Light between 1 and DENSITY pixels each interval.")
-parser.add_argument("-c", "--colourmin", default=255, type=int, help="Minimum colour value chosen at random.")
-parser.add_argument("-m", "--colourmax", default=255, type=int, help="Maximum colour value chosen at random.")
-parser.add_argument("-b", "--blockcolour", action="store_false", help="Block a single colour in each interval.")
+parser.add_argument("-r", "--red", default='255,255', help="Range of red colour values to be chosen from.")
+parser.add_argument("-g", "--green", default='255,255', help="Range of green.")
+parser.add_argument("-b", "--blue", default='255,255', help="Range of blue.")
+parser.add_argument("-k", "--keepcolour", action="store_true", help="Keep chosen colour during interval.")
 args = parser.parse_args()
+
+# Validate arguments
+def validate_colour_range(arg):
+  colour_range = [0, 0]
+  try:
+    possible_list = arg.split(',')
+    colour_range[0] = int(possible_list[0])
+    colour_range[1] = int(possible_list[1])
+    for colour in colour_range:
+      if colour > 255:
+        colour = 255
+      if colour < 0:
+        colour = 0 
+  except Exception: # just fail to white
+    colour_range = [255,255]
+  return colour_range
+
 if args.density > 32:
   args.density =32
-if args.colourmax > 255:
-  args.colourmax = 255
-if args.colourmin > args.colourmax:
-  args.colourmin = args.colourmax
+
+reds = validate_colour_range(args.red) 
+greens = validate_colour_range(args.green) 
+blues = validate_colour_range(args.blue) 
+
 if args.interval > 2:
   args.interval = 2
 
@@ -41,32 +60,57 @@ mote = Mote()
 mote.configure_channel(1, 16, False)
 mote.configure_channel(2, 16, False)
 
+def randclr(colour_range):
+  return randint(colour_range[0], colour_range[1])
+
+def randomise_colours():
+  r = randclr(reds)
+  g = randclr(greens)
+  b = randclr(blues)
+  return [r, g, b]
+
 def sparkle():
   while gsentinel.good:
     pixlist = sample(range(32),randint(1,args.density))
-    r = randint(args.colourmin, args.colourmax)
-    g = randint(args.colourmin, args.colourmax)
-    b = randint(args.colourmin, args.colourmax)
+    c = randomise_colours()
     for cpix in pixlist:      
-      if args.blockcolour:
-        r = randint(args.colourmin, args.colourmax)
-        g = randint(args.colourmin, args.colourmax)
-        b = randint(args.colourmin, args.colourmax)
+      if not args.keepcolour:
+        c = randomise_colours()
       if cpix < 16:
-        mote.set_pixel(1, cpix, r, g, b)
+        mote.set_pixel(1, cpix, c[0], c[1], c[2])
       else:
-        mote.set_pixel(2, cpix-16, r, g, b)
+        mote.set_pixel(2, cpix-16, c[0], c[1], c[2])
       mote.show()
     time.sleep(args.interval)
     mote.clear()
+
+def flash():
+  while gsentinel.good:
+    pixlist = range(32)
+    c = randomise_colours()
+    for cpix in pixlist:      
+      if not args.keepcolour:
+        c = randomise_colours()
+      if cpix < 16:
+        mote.set_pixel(1, cpix, c[0], c[1], c[2])
+      else:
+        mote.set_pixel(2, cpix-16, c[0], c[1], c[2])
+        mote.show()
+    time.sleep(args.interval)
+    mote.clear()
+    mote.show()
+    time.sleep(args.interval)
 
 def main():
   try:
 
     if args.sequence == 'sparkle':
       sparkle()
+    if args.sequence == 'flash':
+      flash()
     else:
-      print('sequence %s not defined.' % args.sequence)
+      if gsentinel.good: # otherwise we've been interrupted in a sequence
+        print('sequence %s not defined.' % args.sequence)
 
   finally:
     mote.clear()

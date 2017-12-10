@@ -1,0 +1,8 @@
+ body {
+    background-color: lightblue;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+.container {
+  padding-bottom:550px;
+}

@@ -1,38 +1,79 @@
 from flask import Flask, render_template, flash, redirect, url_for, request, session
 from subprocess import Popen
+from time import gmtime, strftime
 
 app = Flask(__name__)
 app.secret_key = 'ed234d80111dc32b7824f25ef72ee53e'
 prc = None
+
+# globals holding last arguments to worker
 last_person = ''
+setup_time = ''
+interval = '0.1'
+density = '8'
+redmin = bluemin = greenmin = '0'
+redmax = bluemax = greenmax = '250'
+keep = '2'
 
 @app.route('/')
 def index():
   session['person'] = last_person
-  return render_template('index.html')
+  colour_values = [x for x in range(0,256,10)]
+  return render_template(
+    'index.html',
+    colour_values=colour_values,
+    name=last_person,
+    setup_time=setup_time,
+    interval=interval,
+    density = '8',
+    redmin=redmin,
+    bluemin=bluemin,
+    redmax=redmax,
+    bluemax=bluemax,
+    greenmax=greenmax,
+    keep=keep
+  )
 
 @app.route('/sparkle', methods=['POST'])
 def sparkle():
-  global prc
-  global last_person
-  session['person'] = request.form['person']
-  last_person = session['person']
+  global prc, last_person, setup_time
+  global interval, density, keep, sequence
+  global redmin, redmax, greenmin, greenmax, bluemin, bluemax
+
+  last_person = request.form['person'] if not request.form['person'] == '' else 'Anonymous'
+  setup_time = strftime("%I:%M %p", gmtime()).lstrip('0')
 
   status = 'called'
   if prc:
     prc.terminate()
     status = '%s and stopped' % status
+
+  # collect data from the form
   interval = request.form['interval']
   density = request.form['density']
-  colourmin = request.form['colourmin']
-  colourmax = request.form['colourmax']
-  blockcolour = request.form['blockcolour']
-  args = ['./sparklemote.py', '-i', interval, '-d', density, '-c', colourmin, '-m', colourmax]
-  args.append('sparkle')
-  if blockcolour == 'yes':
-    args.append('-b')
+  redmin = request.form['redmin']
+  redmax = request.form['redmax']
+  red = '%s,%s' % (redmin, redmax)
+  greenmin = request.form['greenmin']
+  greenmax = request.form['greenmax']
+  green = '%s,%s' % (greenmin, greenmax)
+  bluemin = request.form['bluemin']
+  bluemax = request.form['bluemax']
+  blue = '%s,%s' % (bluemin, bluemax)
+  keep = request.form['keep']
+  sequence = request.form['sequence']
+
+  # make an args string for the worker
+  args = ['./sparklemote.py', '-i', interval, '-d', density, '-r', red, '-g', green, '-b', blue]
+  if keep == '1':
+    args.append('-k')
+  args.append(sequence)
+  
   print(args)
+  
+  # call worker
   prc = Popen(args)
+  
   status = '%s and started.' % status
   flash(status)
   return redirect(url_for('index'))

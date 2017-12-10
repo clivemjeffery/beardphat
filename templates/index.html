@@ -1,27 +1,199 @@
 <!doctype html>
 <html><head>
   <title>BeardPhat Controller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Diplomata" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.1/css/bulma.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
 </head>
-<body>
-  <h1>BeardPhat Controller</h1>
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <ul class=flashes>
-      {% for message in messages %}
-        <li>{{ message }}</li>
-      {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
-  <form action="{{ url_for('sparkle') }}" method=post>
-    <div><input type="text" size=15 name="person" value="{{ session['person'] }}"/></div>
-    Sparkle: interval
-    <input type="text" size=7 name="interval" value="0.1"/>
-    <input type="text" size=7 name="density" value="8"/>
-    <input type="text" size=7 name="colourmin" value="0"/>
-    <input type="text" size=7 name="colourmax" value="255"/>
-    <select name="blockcolour"><option>yes</option><option>no</option></select>
-    <input type="submit" value="Start">
-  </form>
-  <a href="./stop/">Stop</a>
+<body style="background-image:url({{ url_for('static', filename='santa.png') }});">
+  <div class="container">
+    <nav class="level">
+      <div class="level-item has-text-centered">
+        <div>
+          <h1 class="title is-4" style="font-family:'Diplomata', cursive;">Mr Jeffery's Santa Beard</h1>
+          {% if name %}
+            <div>
+              <span class="tag is-success">
+                Last set up by&nbsp;<span class="tag is-warning">{{ name }}</span>&nbsp;at {{ setup_time }}
+              </span>
+            </div>
+          {% endif %}
+        <div>
+      </div>
+    </nav>
+    
+    <nav class="level">
+      <div class="level-item has-text-centered">
+        <form action="{{ url_for('sparkle') }}" method="post">
+
+          <div class="field is-horizontal">
+            <label class="label">Seconds <span class="tag is-warning">between on and off:</span>&nbsp;</label>
+            <div class="select is-small">
+                <select name="interval">
+                  {% for x in ['0.1','0.2','0.5','0.75','1.0','1.5','2.0'] %}
+                      <option
+                        {% if x == interval %}
+                          {{ 'selected' }}
+                        {% endif %}
+                        >
+                        {{ x }}
+                      </option>
+                  {% endfor %}
+                </select>
+              </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <label class="label">Maximum <span class="tag is-warning">pixels to light each interval:</span>&nbsp;</label>
+            <div class="select is-small">
+              <select name="density">
+                {% for x in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16] %}
+                    <option
+                      {% if x == 8 %}
+                        {{ 'selected' }}
+                      {% endif %}
+                      >
+                        {{ x }}
+                    </option>
+                {% endfor %}
+              </select>
+            </div>
+            
+          </div>
+
+          <div class="field is-horizontal is-small">
+            <label class="label">Red&nbsp;</label>
+            <div class="field-body">
+              <div class="select is-small is-danger">
+                <select name="redmin">
+                  {% for x in colour_values %}
+                    <option
+                        {% if x == 0 %}
+                          {{ 'selected' }}
+                        {% endif %}
+                        >
+                          {{ x }}
+                      </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <p class="help">&nbsp;-&nbsp;</p>
+              <div class="select is-small is-danger">
+                <select name="redmax">
+                  {% for x in colour_values %}
+                    <option
+                      {% if x == 250 %}
+                        {{ 'selected' }}
+                      {% endif %}
+                      >
+                        {{ x }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal is-small">
+            <label class="label">Green&nbsp;</label>
+            <div class="field-body">
+              <div class="select is-small is-success">
+                <select name="greenmin">
+                  {% for x in colour_values %}
+                    <option
+                        {% if x == 0 %}
+                          {{ 'selected' }}
+                        {% endif %}
+                        >
+                          {{ x }}
+                      </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <p class="help">&nbsp;-&nbsp;</p>
+              <div class="select is-small is-success">
+                <select name="greenmax">
+                  {% for x in colour_values %}
+                    <option
+                      {% if x == 250 %}
+                        {{ 'selected' }}
+                      {% endif %}
+                      >
+                        {{ x }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal is-small">
+            <label class="label">Blue&nbsp;</label>
+            <div class="field-body">
+              <div class="select is-small is-link">
+                <select name="bluemin">
+                  {% for x in colour_values %}
+                     <option
+                        {% if x == 0 %}
+                          {{ 'selected' }}
+                        {% endif %}
+                        >
+                          {{ x }}
+                      </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <p class="help">&nbsp;-&nbsp;</p>
+              <div class="select is-small is-link">
+                <select name="bluemax">
+                  {% for x in colour_values %}
+                    <option
+                      {% if x == 250 %}
+                        {{ 'selected' }}
+                      {% endif %}
+                      >
+                        {{ x }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <label class="label">Randomise colours: </label>
+            <div class="select is-small">
+                <select name="keep">
+                  {% for x in ['solid', 'sparkly'] %}
+                      <option 
+                         value="{{ loop.index }}"
+                         {% if loop.index == keep|int %}
+                           selected='true'
+                         }
+                         {% endif %}
+                        >
+                        {{ x }}
+                      </option>
+                  {% endfor %}
+                </select>
+              </div>
+          </div>
+
+
+          <div class="field">
+            <div class="control">
+              <input class="input" type="text" name="person" placeholder="Sign your setup...">
+            </div>
+          </div>
+
+          <input type="submit" class="button" name="sequence" value="sparkle"/> or
+          <input type="submit" class="button" name="sequence" value="flash"/>
+            
+        </form>
+      </div>
+    </nav>
+
+</div>
 </body></html>
