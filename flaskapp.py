@@ -1,27 +1,36 @@
-from flask import Flask, render_template, flash, redirect, url_for
+from flask import Flask, render_template, flash, redirect, url_for, request, session
 from subprocess import Popen
 
 app = Flask(__name__)
 app.secret_key = 'ed234d80111dc32b7824f25ef72ee53e'
 prc = None
+last_person = ''
 
 @app.route('/')
 def index():
+  session['person'] = last_person
   return render_template('index.html')
 
-@app.route('/sparkle/')
-@app.route('/sparkle/<int:mincolour>')
-def sparkle(mincolour=0):
+@app.route('/sparkle', methods=['POST'])
+def sparkle():
   global prc
+  global last_person
+  session['person'] = request.form['person']
+  last_person = session['person']
+
   status = 'called'
   if prc:
     prc.terminate()
     status = '%s and stopped' % status
-  args = ['./sparklemote.py',
-    'sparkle',
-    '-i','0.1',
-    '-c', str(mincolour),
-    '-m','255']
+  interval = request.form['interval']
+  density = request.form['density']
+  colourmin = request.form['colourmin']
+  colourmax = request.form['colourmax']
+  blockcolour = request.form['blockcolour']
+  args = ['./sparklemote.py', '-i', interval, '-d', density, '-c', colourmin, '-m', colourmax]
+  args.append('sparkle')
+  if blockcolour == 'yes':
+    args.append('-b')
   print(args)
   prc = Popen(args)
   status = '%s and started.' % status
