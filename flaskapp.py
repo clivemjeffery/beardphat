@@ -1,9 +1,8 @@
 from flask import Flask, render_template, flash, redirect, url_for, request, session
 from subprocess import Popen
-from time import gmtime, strftime
+from time import gmtime, strftime, sleep
 
 app = Flask(__name__)
-app.secret_key = 'ed234d80111dc32b7824f25ef72ee53e'
 prc = None
 
 # globals holding last arguments to worker
@@ -17,7 +16,6 @@ keep = '2'
 
 @app.route('/')
 def index():
-  session['person'] = last_person
   colour_values = [x for x in range(0,256,10)]
   return render_template(
     'index.html',
@@ -25,11 +23,12 @@ def index():
     name=last_person,
     setup_time=setup_time,
     interval=interval,
-    density = '8',
+    density=density,
     redmin=redmin,
-    bluemin=bluemin,
     redmax=redmax,
+    bluemin=bluemin,
     bluemax=bluemax,
+    greenmin=greenmin,
     greenmax=greenmax,
     keep=keep
   )
@@ -40,15 +39,13 @@ def sparkle():
   global interval, density, keep, sequence
   global redmin, redmax, greenmin, greenmax, bluemin, bluemax
 
-  last_person = request.form['person'] if not request.form['person'] == '' else 'Anonymous'
-  setup_time = strftime("%I:%M %p", gmtime()).lstrip('0')
-
-  status = 'called'
   if prc:
     prc.terminate()
-    status = '%s and stopped' % status
+    sleep(0.1) # let it finish, Pi is slow
+    prc = None
 
   # collect data from the form
+  last_person = request.form['person'] if not request.form['person'] == '' else 'Anonymous'
   interval = request.form['interval']
   density = request.form['density']
   redmin = request.form['redmin']
@@ -68,25 +65,16 @@ def sparkle():
   if keep == '1':
     args.append('-k')
   args.append(sequence)
-  
-  print(args)
-  
+  setup_time = strftime("%I:%M %p", gmtime()).lstrip('0')
   # call worker
   prc = Popen(args)
-  
-  status = '%s and started.' % status
-  flash(status)
+  sleep(0.1) # let it get started, Pi is slow
+
   return redirect(url_for('index'))
 
 @app.route('/stop/')
 def stop():
   global prc
-  status = 'Stopping'
   if prc:
     prc.terminate()
-    status = '%s and stopped' % status
-  else:
-    status = '%s but nothing to stop' % status
-  status = '%s.' % status
-  flash(status)
   return redirect(url_for('index'))

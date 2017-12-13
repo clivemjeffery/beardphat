@@ -12,18 +12,23 @@
     <nav class="level">
       <div class="level-item has-text-centered">
         <div>
-          <h1 class="title is-4" style="font-family:'Diplomata', cursive;">Mr Jeffery's Santa Beard</h1>
+          <h1 class="title is-4" style="font-family:'Diplomata', cursive;">
+            <a class="button is-small is-black" href="{{ url_for('stop') }}">!</a>
+            Mr Jeffery's Santa Beard
+            <a class="button is-small is-black" href="{{ url_for('stop') }}">!</a>
+          </h1>
           {% if name %}
             <div>
               <span class="tag is-success">
                 Last set up by&nbsp;<span class="tag is-warning">{{ name }}</span>&nbsp;at {{ setup_time }}
               </span>
+              <a class="button is-small is-info" href="{{ url_for('index') }}">Refresh</a>
             </div>
           {% endif %}
         <div>
       </div>
     </nav>
-    
+
     <nav class="level">
       <div class="level-item has-text-centered">
         <form action="{{ url_for('sparkle') }}" method="post">
@@ -46,31 +51,31 @@
           </div>
 
           <div class="field is-horizontal">
-            <label class="label">Maximum <span class="tag is-warning">pixels to light each interval:</span>&nbsp;</label>
+            <label class="label"><span class="tag is-warning">Maximum pixels to sparkle each interval:</span>&nbsp;</label>
             <div class="select is-small">
               <select name="density">
                 {% for x in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16] %}
                     <option
-                      {% if x == 8 %}
+                      {% if x == density|int %}
                         {{ 'selected' }}
                       {% endif %}
                       >
-                        {{ x }}
+                      {{ x }}
                     </option>
                 {% endfor %}
               </select>
             </div>
-            
+
           </div>
 
           <div class="field is-horizontal is-small">
-            <label class="label">Red&nbsp;</label>
+            <label class="label"><span class="tag is-danger">Red</span>&nbsp;</label>
             <div class="field-body">
               <div class="select is-small is-danger">
                 <select name="redmin">
                   {% for x in colour_values %}
                     <option
-                        {% if x == 0 %}
+                        {% if x == redmin|int %}
                           {{ 'selected' }}
                         {% endif %}
                         >
@@ -79,12 +84,11 @@
                   {% endfor %}
                 </select>
               </div>
-              <p class="help">&nbsp;-&nbsp;</p>
               <div class="select is-small is-danger">
                 <select name="redmax">
                   {% for x in colour_values %}
                     <option
-                      {% if x == 250 %}
+                      {% if x == redmax|int %}
                         {{ 'selected' }}
                       {% endif %}
                       >
@@ -97,13 +101,13 @@
           </div>
 
           <div class="field is-horizontal is-small">
-            <label class="label">Green&nbsp;</label>
+            <label class="label"><span class="tag is-success">Green</span>&nbsp;</label>
             <div class="field-body">
               <div class="select is-small is-success">
                 <select name="greenmin">
                   {% for x in colour_values %}
                     <option
-                        {% if x == 0 %}
+                        {% if x == greenmin|int %}
                           {{ 'selected' }}
                         {% endif %}
                         >
@@ -112,12 +116,11 @@
                   {% endfor %}
                 </select>
               </div>
-              <p class="help">&nbsp;-&nbsp;</p>
               <div class="select is-small is-success">
                 <select name="greenmax">
                   {% for x in colour_values %}
                     <option
-                      {% if x == 250 %}
+                      {% if x == greenmax|int %}
                         {{ 'selected' }}
                       {% endif %}
                       >
@@ -130,13 +133,13 @@
           </div>
 
           <div class="field is-horizontal is-small">
-            <label class="label">Blue&nbsp;</label>
+            <label class="label"><span class="tag is-link">Blue</span>&nbsp;</label>
             <div class="field-body">
               <div class="select is-small is-link">
                 <select name="bluemin">
                   {% for x in colour_values %}
                      <option
-                        {% if x == 0 %}
+                        {% if x == bluemin|int %}
                           {{ 'selected' }}
                         {% endif %}
                         >
@@ -145,12 +148,11 @@
                   {% endfor %}
                 </select>
               </div>
-              <p class="help">&nbsp;-&nbsp;</p>
               <div class="select is-small is-link">
                 <select name="bluemax">
                   {% for x in colour_values %}
                     <option
-                      {% if x == 250 %}
+                      {% if x == bluemax|int %}
                         {{ 'selected' }}
                       {% endif %}
                       >
@@ -163,11 +165,11 @@
           </div>
 
           <div class="field is-horizontal">
-            <label class="label">Randomise colours: </label>
+            <label class="label"><span class="tag is-warning">Randomise colours:</span> </label>
             <div class="select is-small">
                 <select name="keep">
-                  {% for x in ['solid', 'sparkly'] %}
-                      <option 
+                  {% for x in ['not so much', 'a lot'] %}
+                      <option
                          value="{{ loop.index }}"
                          {% if loop.index == keep|int %}
                            selected='true'
@@ -188,9 +190,9 @@
             </div>
           </div>
 
-          <input type="submit" class="button" name="sequence" value="sparkle"/> or
-          <input type="submit" class="button" name="sequence" value="flash"/>
-            
+          <input type="submit" class="button is-primary is-large" name="sequence" value="sparkle"/> or
+          <input type="submit" class="button is-dark is-large" name="sequence" value="flash"/>
+
         </form>
       </div>
     </nav>
