@@ -33,7 +33,7 @@ $ venv\Scripts\activate
 $ deactivate
 ````
 
-After activating the virutal environment, I can run the flask app using something like this.
+After activating the virtual environment, I can run the flask app using something like this.
 
 ````
 $ export FLASK_APP=flaskapp.py
